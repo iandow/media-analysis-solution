@@ -7,35 +7,47 @@ The Media Analysis Solution is a turnkey reference implementation that helps cus
 
 For more information and a detailed deployment guide visit the Media Analysis Solution at https://aws.amazon.com/answers/media-entertainment/media-analysis-solution/.
 
+## Preliminary AWS CLI Setup: 
+Install and setup credentials for the AWS CLI (see http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
+
 ## Running unit tests for customization
 * Clone the repository, then make the desired code changes
 * Next, run unit tests to make sure added customization passes the tests
 ```
 cd ./deployment
-chmod +x ./run-unit-tests.sh  \n
-./run-unit-tests.sh \n
+chmod +x ./run-unit-tests.sh 
+./run-unit-tests.sh
 ```
 ## Building distributable for customization
-* Configure the bucket name of your target Amazon S3 distribution bucket
+* Define top-level project variables. The bucket name is where customized code will reside. Version number helps organize custom code. It can be anything you want but it's suggested to start with 1.0.0. Region must be an [AWS region that supports AWS Elemental MediaConvert](https://docs.aws.amazon.com/general/latest/gr/rande.html#mediaconvert_region).
 ```
-export DIST_OUTPUT_BUCKET=my-bucket-name # bucket where customized code will reside
-export VERSION=my-version # version number for the customized code
-```
-_Note:_ You would have to create an S3 bucket with the prefix 'my-bucket-name-<aws_region>'; aws_region is where you are testing the customized solution. Also, the assets in bucket should be publicly accessible.
-
-* Now build the distributable:
-```
-chmod +x ./build-s3-dist.sh \n
-./build-s3-dist.sh $DIST_OUTPUT_BUCKET $VERSION \n
+export DIST_OUTPUT_BUCKET=mas
+export VERSION=1.0.0
+export REGION=us-east-1
 ```
 
-* Deploy the distributable to an Amazon S3 bucket in your account. _Note:_ you must have the AWS Command Line Interface installed.
+* Create the S3 bucket with the prefix '$DIST_OUTPUT_BUCKET-$REGION'; The assets in this bucket should be publicly accessible.
 ```
-aws s3 cp ./dist/ s3://my-bucket-name-<aws_region>/media-analysis-solution/<my-version>/ --recursive --acl bucket-owner-full-control --profile aws-cred-profile-name \n
+aws s3 mb s3://$DIST_OUTPUT_BUCKET-$REGION --region $REGION
+```
+
+* Now build the distributable templates:
+```
+cd media-analysis-solution/deployment/
+chmod +x ./build-s3-dist.sh
+./build-s3-dist.sh $DIST_OUTPUT_BUCKET $VERSION
+```
+
+* Deploy the distributable templates to your project S3 bucket
+```
+aws s3 cp ./dist/ s3://$DIST_OUTPUT_BUCKET-$REGION/media-analysis-solution/$VERSION/ --recursive --acl bucket-owner-full-control
 ```
 
 * Get the link of the media-analysis-deploy.template uploaded to your Amazon S3 bucket.
-* Deploy the Media Analysis Solution to your account by launching a new AWS CloudFormation stack using the link of the media-analysis-deploy.template.
+* Deploy the Media Analysis Solution to your account by launching a new AWS CloudFormation stack in the AWS Management Console or with the AWS CLI, like this:
+```
+aws cloudformation create-stack --stack-name mas1g --template-url  https://s3.amazonaws.com/$DIST_OUTPUT_BUCKET-$REGION/media-analysis-solution/$VERSION/media-analysis-deploy.template --region $REGION --parameters ParameterKey=Email,ParameterValue=ianwow@amazon.com --role-arn arn:aws:iam::773074507832:role/admin_for_mas1.0  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+```
 
 ## File Structure
 The Media Analysis Solution consists of a demo website, an analysis orchestration layer, a search and storage layer, and an API layer.
