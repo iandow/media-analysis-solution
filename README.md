@@ -8,6 +8,7 @@ The Media Analysis Solution is a turnkey reference implementation that helps cus
 For more information and a detailed deployment guide visit the Media Analysis Solution at https://aws.amazon.com/answers/media-entertainment/media-analysis-solution/.
 
 ## Preliminary AWS CLI Setup: 
+Install the Node.js package manager (e.g. `brew install npm`)
 Install and setup credentials for the AWS CLI (see http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
 
 ## Running unit tests for customization
@@ -18,10 +19,13 @@ cd ./deployment
 chmod +x ./run-unit-tests.sh 
 ./run-unit-tests.sh
 ```
-## Building distributable for customization
+
+## Build and deploy Cloud Formation templates
+Run `deploy.sh` script or run the following steps manually:
+
 * Define top-level project variables. The bucket name is where customized code will reside. Version number helps organize custom code. It can be anything you want but it's suggested to start with 1.0.0. Region must be an [AWS region that supports AWS Elemental MediaConvert](https://docs.aws.amazon.com/general/latest/gr/rande.html#mediaconvert_region).
 ```
-export DIST_OUTPUT_BUCKET=mas
+export DIST_OUTPUT_BUCKET=mas1
 export VERSION=1.0.0
 export REGION=us-east-1
 ```
@@ -46,7 +50,7 @@ aws s3 cp ./dist/ s3://$DIST_OUTPUT_BUCKET-$REGION/media-analysis-solution/$VERS
 * Get the link of the media-analysis-deploy.template uploaded to your Amazon S3 bucket.
 * Deploy the Media Analysis Solution to your account by launching a new AWS CloudFormation stack in the AWS Management Console or with the AWS CLI, like this:
 ```
-aws cloudformation create-stack --stack-name mas1g --template-url  https://s3.amazonaws.com/$DIST_OUTPUT_BUCKET-$REGION/media-analysis-solution/$VERSION/media-analysis-deploy.template --region $REGION --parameters ParameterKey=Email,ParameterValue=ianwow@amazon.com --role-arn arn:aws:iam::773074507832:role/admin_for_mas1.0  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation create-stack --stack-name $DIST_OUTPUT_BUCKET --template-url  https://s3.amazonaws.com/$DIST_OUTPUT_BUCKET-$REGION/media-analysis-solution/$VERSION/media-analysis-deploy.template --region $REGION --parameters ParameterKey=Email,ParameterValue=ianwow@amazon.com --role-arn arn:aws:iam::773074507832:role/admin_for_mas1.0  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 ```
 
 ## File Structure
