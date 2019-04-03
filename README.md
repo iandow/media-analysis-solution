@@ -8,7 +8,16 @@ The Media Analysis Solution is a turnkey reference implementation that helps cus
 For more information and a detailed deployment guide visit the Media Analysis Solution at https://aws.amazon.com/answers/media-entertainment/media-analysis-solution/.
 
 ## Preliminary AWS CLI Setup: 
-Install the Node.js package manager (e.g. `brew install npm`)
+Install the Node version 9. This is easies with the [node version manager](https://github.com/creationix/nvm) (nvm), like this:
+```
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+source ~/.bashrc
+nvm install 9
+nvm use 9
+node --version # should say v9.11.2
+npm -version # should say 5.6.0
+```
+
 Install and setup credentials for the AWS CLI (see http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html)
 
 ## Running unit tests for customization
